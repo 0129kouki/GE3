@@ -1,4 +1,4 @@
-﻿#include <Windows.h>
+﻿//#include <Windows.h>
 #include <d3d12.h>
 #include <dxgi1_6.h>
 #include <cassert>
@@ -9,6 +9,7 @@
 #include <d3dcompiler.h>
 #include"Input.h"
 #include <wrl.h>
+#include"WinApp.h"
 
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -36,7 +37,6 @@ struct ConstBufferDataMaterial {
 struct ConstBufferDataTransform {
 	XMMATRIX mat;   // ３Ｄ変換行列
 };
-
 // 3Dオブジェクト型
 struct Object3d
 {
@@ -53,7 +53,6 @@ struct Object3d
 	// 親オブジェクトへのポインタ
 	Object3d* parent = nullptr;
 };
-
 // 3Dオブジェクト初期化
 void InitializeObject3d(Object3d* object, ID3D12Device* device) {
 	HRESULT result;
@@ -85,7 +84,6 @@ void InitializeObject3d(Object3d* object, ID3D12Device* device) {
 	result = object->constBuffTransform->Map(0, nullptr, (void**)&object->constMapTransform);
 	assert(SUCCEEDED(result));
 }
-
 void UpdateObject3d(Object3d* object, XMMATRIX& matView, XMMATRIX& matProjection) {
 	XMMATRIX matScale, matRot, matTrans;
 
@@ -112,7 +110,6 @@ void UpdateObject3d(Object3d* object, XMMATRIX& matView, XMMATRIX& matProjection
 	// 定数バッファへデータ転送
 	object->constMapTransform->mat = object->matWorld * matView * matProjection;
 }
-
 void DrawObject3d(Object3d* object, ID3D12GraphicsCommandList* commandList, D3D12_VERTEX_BUFFER_VIEW& vbView, D3D12_INDEX_BUFFER_VIEW& ibView, UINT numIndices) {
 	// 頂点バッファの設定
 	commandList->IASetVertexBuffers(0, 1, &vbView);
@@ -124,7 +121,6 @@ void DrawObject3d(Object3d* object, ID3D12GraphicsCommandList* commandList, D3D1
 	// 描画コマンド
 	commandList->DrawIndexedInstanced(numIndices, 1, 0, 0, 0);
 }
-
 ScratchImage LoadImageFromFile(const wchar_t* path) {
 	TexMetadata metadata{};
 	ScratchImage scratchImg{};
@@ -146,7 +142,6 @@ ScratchImage LoadImageFromFile(const wchar_t* path) {
 
 	return scratchImg;
 }
-
 ComPtr<ID3D12Resource> CreateTexture(ID3D12Device* device, const TexMetadata& metadata) {
 	// ヒープ設定
 	D3D12_HEAP_PROPERTIES textureHeapProp{};
@@ -176,7 +171,6 @@ ComPtr<ID3D12Resource> CreateTexture(ID3D12Device* device, const TexMetadata& me
 	}
 	return nullptr;
 }
-
 void UploadSubresources(ID3D12Resource* texBuff, const ScratchImage& scratchImg) {
 	// 全ミップマップについて
 	size_t mipLevels = scratchImg.GetMetadata().mipLevels;
@@ -194,7 +188,6 @@ void UploadSubresources(ID3D12Resource* texBuff, const ScratchImage& scratchImg)
 		assert(SUCCEEDED(result));
 	}
 }
-
 // ウィンドウプロシージャ
 LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 	// メッセージ応じてゲーム固有の処理を行う
@@ -209,48 +202,15 @@ LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 	// 標準のメッセージ処理を行う
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
-
-
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
-
-#pragma region WindowsAPI初期化処理
-	// ウィンドウサイズ
-	const int window_width = 1280;  // 横幅
-	const int window_height = 720;  // 縦幅
 	//ポインタ
 	Input* input = nullptr;
-	// ウィンドウクラスの設定
-	WNDCLASSEX w{};
-	w.cbSize = sizeof(WNDCLASSEX);
-	w.lpfnWndProc = (WNDPROC)WindowProc; // ウィンドウプロシージャを設定
-	w.lpszClassName = L"DirectXGame"; // ウィンドウクラス名
-	w.hInstance = GetModuleHandle(nullptr); // ウィンドウハンドル
-	w.hCursor = LoadCursor(NULL, IDC_ARROW); // カーソル指定
-
-	// ウィンドウクラスをOSに登録する
-	RegisterClassEx(&w);
-	// ウィンドウサイズ{ X座標 Y座標 横幅 縦幅 }
-	RECT wrc = { 0, 0, window_width, window_height };
-	// 自動でサイズを補正する
-	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
-
-	// ウィンドウオブジェクトの生成
-	HWND hwnd = CreateWindow(w.lpszClassName, // クラス名
-		L"DirectXGame",         // タイトルバーの文字
-		WS_OVERLAPPEDWINDOW,        // 標準的なウィンドウスタイル
-		CW_USEDEFAULT,              // 表示X座標（OSに任せる）
-		CW_USEDEFAULT,              // 表示Y座標（OSに任せる）
-		wrc.right - wrc.left,       // ウィンドウ横幅
-		wrc.bottom - wrc.top,   // ウィンドウ縦幅
-		nullptr,                // 親ウィンドウハンドル
-		nullptr,                // メニューハンドル
-		w.hInstance,            // 呼び出しアプリケーションハンドル
-		nullptr);               // オプション
-
-	// ウィンドウを表示状態にする
-	ShowWindow(hwnd, SW_SHOW);
-
+	WinApp* winApp = nullptr;
+#pragma region WindowsAPI初期化処理
+	//WindowsAPIの初期化
+	winApp = new WinApp();
+	winApp->Initialize();
 	MSG msg{};  // メッセージ
 #pragma endregion
 
@@ -380,7 +340,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ComPtr<IDXGISwapChain1> swapChain1;
 	// スワップチェーンの生成
 	result = dxgiFactory->CreateSwapChainForHwnd(
-		commandQueue.Get(), hwnd, &swapChainDesc, nullptr, nullptr, &swapChain1);
+		commandQueue.Get(), winApp->GetHwnd(), &swapChainDesc, nullptr, nullptr, &swapChain1);
 	assert(SUCCEEDED(result));
 
 	// SwapChain4を得る
@@ -418,8 +378,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// リソース設定
 	D3D12_RESOURCE_DESC depthResourceDesc{};
 	depthResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-	depthResourceDesc.Width = window_width; // レンダーターゲットに合わせる
-	depthResourceDesc.Height = window_height; // レンダーターゲットに合わせる
+	depthResourceDesc.Width = /*window_width*/WinApp::window_width; // レンダーターゲットに合わせる
+	depthResourceDesc.Height = /*window_height*/WinApp::window_height; // レンダーターゲットに合わせる
 	depthResourceDesc.DepthOrArraySize = 1;
 	depthResourceDesc.Format = DXGI_FORMAT_D32_FLOAT; // 深度値フォーマット
 	depthResourceDesc.SampleDesc.Count = 1;
@@ -469,7 +429,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 	//入力の初期化
 	input = new Input();
-	input->Initialize(w.hInstance, hwnd);
+	input->Initialize(/*winApp->GetHInstance(), winApp->GetHwnd()*/winApp);
 
 
 
@@ -877,7 +837,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 射影変換行列(透視投影)
 	XMMATRIX matProjection = XMMatrixPerspectiveFovLH(
 		XMConvertToRadians(45.0f),
-		(float)window_width / window_height,
+		(float)/*window_width*/WinApp::window_width / /*window_height*/WinApp::window_height,
 		0.1f, 1000.0f
 	);
 
@@ -946,17 +906,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// ゲームループ
 	while (true) {
-		// メッセージがある？
-		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
-			TranslateMessage(&msg); // キー入力メッセージの処理
-			DispatchMessage(&msg); // プロシージャにメッセージを送る
-		}
+		//// メッセージがある？
+		//if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+		//	TranslateMessage(&msg); // キー入力メッセージの処理
+		//	DispatchMessage(&msg); // プロシージャにメッセージを送る
+		//}
+		//// ✖ボタンで終了メッセージが来たらゲームループを抜ける
+		//if (msg.message == WM_QUIT) {
+		//	break;
+		//}
 
-		// ✖ボタンで終了メッセージが来たらゲームループを抜ける
-		if (msg.message == WM_QUIT) {
+		//Windowsのメッセージ処理
+		if (winApp->ProcessMessage())
+		{
+			//ゲームループを抜ける
 			break;
 		}
-
 		input->Update();
 
 		//// 数字の0キーが押されていたら
@@ -1027,8 +992,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		// ４．描画コマンドここから
 		// ビューポート設定コマンド
 		D3D12_VIEWPORT viewport{};
-		viewport.Width = window_width;
-		viewport.Height = window_height;
+		viewport.Width = /*window_width*/WinApp::window_width;
+		viewport.Height = /*window_height*/WinApp::window_height;
 		viewport.TopLeftX = 0;
 		viewport.TopLeftY = 0;
 		viewport.MinDepth = 0.0f;
@@ -1039,9 +1004,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		// シザー矩形
 		D3D12_RECT scissorRect{};
 		scissorRect.left = 0;                                       // 切り抜き座標左
-		scissorRect.right = scissorRect.left + window_width;        // 切り抜き座標右
+		scissorRect.right = scissorRect.left + /*window_width*/WinApp::window_width;        // 切り抜き座標右
 		scissorRect.top = 0;                                        // 切り抜き座標上
-		scissorRect.bottom = scissorRect.top + window_height;       // 切り抜き座標下
+		scissorRect.bottom = scissorRect.top + /*window_height*/WinApp::window_height;       // 切り抜き座標下
 		// シザー矩形設定コマンドを、コマンドリストに積む
 		commandList->RSSetScissorRects(1, &scissorRect);
 		// プリミティブ形状の設定コマンド
@@ -1057,6 +1022,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		commandList->SetGraphicsRootConstantBufferView(0, constBuffMaterial->GetGPUVirtualAddress());
 		// SRVヒープの設定コマンド
 		ID3D12DescriptorHeap* descHeaps[] = { srvHeap.Get() };
+		commandList->SetDescriptorHeaps(1, descHeaps);
 		commandList->SetDescriptorHeaps(1, descHeaps);
 		// SRVヒープの先頭ハンドルを取得（SRVを指しているはず）
 		D3D12_GPU_DESCRIPTOR_HANDLE srvGpuHandle = srvHeap->GetGPUDescriptorHandleForHeapStart();
@@ -1113,9 +1079,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 
 	delete input;
-
-	// ウィンドウクラスを登録解除
-	UnregisterClass(w.lpszClassName, w.hInstance);
-
+	//// ウィンドウクラスを登録解除
+	//UnregisterClass(w.lpszClassName, w.hInstance);
+	//WindowsAPIの終了処理
+	winApp->Finalize();
+	//WindowsAPI解放
+	delete winApp;
 	return 0;
 }
