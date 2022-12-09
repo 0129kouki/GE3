@@ -10,6 +10,7 @@
 #include"Input.h"
 #include <wrl.h>
 #include"WinApp.h"
+#include"DirectXCommon.h"
 
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -207,6 +208,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//ポインタ
 	Input* input = nullptr;
 	WinApp* winApp = nullptr;
+	DirectXCommon* dxCommon = nullptr;
 #pragma region WindowsAPI初期化処理
 	//WindowsAPIの初期化
 	winApp = new WinApp();
@@ -216,14 +218,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #pragma region DirectX初期化処理
 	// DirectX初期化処理　ここから
-	HRESULT result;
-	ComPtr<ID3D12Device> device;
-	ComPtr<IDXGIFactory7> dxgiFactory;
-	ComPtr<IDXGISwapChain4> swapChain;
-	ComPtr<ID3D12CommandAllocator> commandAllocator;
-	ComPtr<ID3D12GraphicsCommandList> commandList;
-	ComPtr<ID3D12CommandQueue> commandQueue;
-	ComPtr<ID3D12DescriptorHeap> rtvHeap;
+	dxCommon = new DirectXCommon();
+	dxCommon->Inityalize();
 
 #ifdef _DEBUG
 	//デバッグレイヤーをオンに
@@ -312,36 +308,34 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 #endif
 
-	// コマンドアロケータを生成
-	result = device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator));
-	assert(SUCCEEDED(result));
+	//// コマンドアロケータを生成
+	//result = device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator));
+	//assert(SUCCEEDED(result));
+	//// コマンドリストを生成
+	//result = device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator.Get(), nullptr, IID_PPV_ARGS(&commandList));
+	//assert(SUCCEEDED(result));
+	////コマンドキューの設定
+	//D3D12_COMMAND_QUEUE_DESC commandQueueDesc{};
+	////コマンドキューを生成
+	//result = device->CreateCommandQueue(&commandQueueDesc, IID_PPV_ARGS(&commandQueue));
+	//assert(SUCCEEDED(result));
 
-	// コマンドリストを生成
-	result = device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator.Get(), nullptr, IID_PPV_ARGS(&commandList));
-	assert(SUCCEEDED(result));
+	//// スワップチェーンの設定
+	//DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
+	//swapChainDesc.Width = 1280;
+	//swapChainDesc.Height = 720;
+	//swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;  // 色情報の書式
+	//swapChainDesc.SampleDesc.Count = 1; // マルチサンプルしない
+	//swapChainDesc.BufferUsage = DXGI_USAGE_BACK_BUFFER; // バックバッファ用
+	//swapChainDesc.BufferCount = 2;  // バッファ数を２つに設定
+	//swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD; // フリップ後は破棄
+	//swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
-	//コマンドキューの設定
-	D3D12_COMMAND_QUEUE_DESC commandQueueDesc{};
-	//コマンドキューを生成
-	result = device->CreateCommandQueue(&commandQueueDesc, IID_PPV_ARGS(&commandQueue));
-	assert(SUCCEEDED(result));
-
-	// スワップチェーンの設定
-	DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
-	swapChainDesc.Width = 1280;
-	swapChainDesc.Height = 720;
-	swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;  // 色情報の書式
-	swapChainDesc.SampleDesc.Count = 1; // マルチサンプルしない
-	swapChainDesc.BufferUsage = DXGI_USAGE_BACK_BUFFER; // バックバッファ用
-	swapChainDesc.BufferCount = 2;  // バッファ数を２つに設定
-	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD; // フリップ後は破棄
-	swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
-
-	ComPtr<IDXGISwapChain1> swapChain1;
-	// スワップチェーンの生成
-	result = dxgiFactory->CreateSwapChainForHwnd(
-		commandQueue.Get(), winApp->GetHwnd(), &swapChainDesc, nullptr, nullptr, &swapChain1);
-	assert(SUCCEEDED(result));
+	//ComPtr<IDXGISwapChain1> swapChain1;
+	//// スワップチェーンの生成
+	//result = dxgiFactory->CreateSwapChainForHwnd(
+	//	commandQueue.Get(), winApp->GetHwnd(), &swapChainDesc, nullptr, nullptr, &swapChain1);
+	//assert(SUCCEEDED(result));
 
 	// SwapChain4を得る
 	swapChain1->QueryInterface(IID_PPV_ARGS(&swapChain));
@@ -1079,6 +1073,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 
 	delete input;
+	delete dxCommon;
 	//// ウィンドウクラスを登録解除
 	//UnregisterClass(w.lpszClassName, w.hInstance);
 	//WindowsAPIの終了処理
