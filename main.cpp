@@ -1,8 +1,8 @@
 ﻿//#include <Windows.h>
-#include <d3d12.h>
-#include <dxgi1_6.h>
-#include <cassert>
-#include <vector>
+//#include <d3d12.h>
+//#include <dxgi1_6.h>
+//#include <cassert>
+//#include <vector>
 #include <string>
 #include <DirectXMath.h>
 #include <DirectXTex.h>
@@ -12,8 +12,8 @@
 #include"WinApp.h"
 #include"DirectXCommon.h"
 
-#pragma comment(lib, "d3d12.lib")
-#pragma comment(lib, "dxgi.lib")
+//#pragma comment(lib, "d3d12.lib")
+//#pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "dinput8.lib")
 #pragma comment(lib, "dxguid.lib")
@@ -210,6 +210,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	WinApp* winApp = nullptr;
 	DirectXCommon* dxCommon = nullptr;
 #pragma region WindowsAPI初期化処理
+	
+
 	//WindowsAPIの初期化
 	winApp = new WinApp();
 	winApp->Initialize();
@@ -219,7 +221,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma region DirectX初期化処理
 	// DirectX初期化処理　ここから
 	dxCommon = new DirectXCommon();
-	dxCommon->Inityalize();
+	dxCommon->Inityalize(winApp);
 
 #ifdef _DEBUG
 	//デバッグレイヤーをオンに
@@ -1074,6 +1076,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	delete input;
 	delete dxCommon;
+	dxCommon = nullptr;
 	//// ウィンドウクラスを登録解除
 	//UnregisterClass(w.lpszClassName, w.hInstance);
 	//WindowsAPIの終了処理
