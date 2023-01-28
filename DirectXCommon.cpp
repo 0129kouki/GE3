@@ -1,5 +1,6 @@
 #include "DirectXCommon.h"
 #include<cassert>
+#include <thread>
 
 using namespace Microsoft::WRL;
 
@@ -9,6 +10,8 @@ void DirectXCommon::Inityalize(WinApp* winApp)
 	assert(winApp);
 	//メンバ変数に記録
 	this->winApp = winApp;
+	//FPS固定
+	InitializeFixFPS();
 	// DirectX初期化処理　ここから
 	//HRESULT result;
 	// DirectX初期化処理　ここまで
@@ -92,7 +95,8 @@ void DirectXCommon::PosDraw()
 		WaitForSingleObject(event, INFINITE);
 		CloseHandle(event);
 	}
-
+	//FPS固定
+	UpdateFixFPS();
 	// キューをクリア
 	result = commandAllocator->Reset();
 	assert(SUCCEEDED(result));
@@ -100,7 +104,7 @@ void DirectXCommon::PosDraw()
 	result = commandList->Reset(commandAllocator.Get(), nullptr);
 	assert(SUCCEEDED(result));
 }
-void DirectXCommon::InityalizeDevice()
+void DirectXCommon::InitializeDevice()
 {
 
 	HRESULT result;
@@ -193,7 +197,7 @@ void DirectXCommon::InityalizeDevice()
 #endif
 
 }
-void DirectXCommon::InityalizeCommand()
+void DirectXCommon::InitializeCommand()
 {
 	HRESULT result;
 	// コマンドアロケータを生成
@@ -210,7 +214,7 @@ void DirectXCommon::InityalizeCommand()
 	result = device->CreateCommandQueue(&commandQueueDesc, IID_PPV_ARGS(&commandQueue));
 	assert(SUCCEEDED(result));
 }
-void DirectXCommon::InityalizeSwapchain()
+void DirectXCommon::InitializeSwapchain()
 {
 	HRESULT result;
 	// スワップチェーンの設定
@@ -233,7 +237,7 @@ void DirectXCommon::InityalizeSwapchain()
 	swapChain1->QueryInterface(IID_PPV_ARGS(&swapChain));
 	assert(SUCCEEDED(result));
 }
-void DirectXCommon::InityalizeRenderTargetView()
+void DirectXCommon::InitializeRenderTargetView()
 {
 	//HRESULT result;
 	// デスクリプタヒープの設定
@@ -263,7 +267,7 @@ void DirectXCommon::InityalizeRenderTargetView()
 		device->CreateRenderTargetView(backBuffers[i].Get(), &rtvDesc, rtvHandle);
 	}
 }
-void DirectXCommon::InityalizeDepthBuffer()
+void DirectXCommon::InitializeDepthBuffer()
 {
 	HRESULT result;
 	// リソース設定
@@ -310,11 +314,38 @@ void DirectXCommon::InityalizeDepthBuffer()
 		dsvHeap->GetCPUDescriptorHandleForHeapStart());
 
 }
-void DirectXCommon::InityalizeFence()
+void DirectXCommon::InitializeFence()
 {
 
 	HRESULT result;
 	// フェンスの生成
 	result = device->CreateFence(fenceVal, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
 	assert(SUCCEEDED(result));
+}
+void DirectXCommon::InitializeFixFPS()
+{
+	reference_ = std::chrono::steady_clock::now();
+}
+void DirectXCommon::UpdateFixFPS()
+{
+	//1/60秒ぴったりの時間
+	const std::chrono::microseconds kMinTime(uint64_t(1000000.0f / 60.0f));	
+	//1/60秒よりわずかに短い時間
+	const std::chrono::microseconds kMinCheckTime(uint64_t(1000000.0f / 65.0f));
+	//現在時間を取得する
+	std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+	//前回記録時間からの経過時間を取得する
+	std::chrono::microseconds elapsed = std::chrono::duration_cast<std::chrono::microseconds>(now - reference_);
+	//1/60秒(よりわずかに短い時間)経っていない場合
+	if (elapsed < kMinCheckTime)
+	{
+		//1/60秒経過するまで微小なスリープを繰り返す
+		while (std::chrono::steady_clock::now() - reference_ < kMinTime)
+		{
+			//1マイクロスリープ
+			std::this_thread::sleep_for(std::chrono::microseconds(1));
+		}
+	}
+	//現在の時間を記録する
+	reference_ = std::chrono::steady_clock::now();
 }

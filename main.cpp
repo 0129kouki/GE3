@@ -224,13 +224,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// DirectX初期化処理　ここから
 	dxCommon = new DirectXCommon();
 	dxCommon->Inityalize(winApp);
-	dxCommon->InityalizeDevice();
-	dxCommon->InityalizeCommand();
+	dxCommon->InitializeDevice();
+	dxCommon->InitializeCommand();
 
-	dxCommon->InityalizeSwapchain();
-	dxCommon->InityalizeRenderTargetView();
-	dxCommon->InityalizeDepthBuffer();
-	dxCommon->InityalizeFence();
+	dxCommon->InitializeSwapchain();
+	dxCommon->InitializeRenderTargetView();
+	dxCommon->InitializeDepthBuffer();
+	dxCommon->InitializeFence();
 
 	// DirectX初期化処理　ここまで
 #pragma endregion

@@ -3,6 +3,7 @@
 #include<dxgi1_6.h>
 #include<wrl.h>
 #include<vector>
+#include<chrono>
 #include"WinApp.h"
 
 #pragma comment(lib,"d3d12.lib")
@@ -28,31 +29,41 @@ public:
 	/// <summary>
 	/// デバイス初期化
 	/// </summary>
-	void InityalizeDevice();
+	void InitializeDevice();
 	/// <summary>
 	/// コマンド関連の初期化
 	/// </summary>
-	void InityalizeCommand();
+	void InitializeCommand();
 	/// <summary>
 	/// スワップチェーン初期化
 	/// </summary>
-	void InityalizeSwapchain();
+	void InitializeSwapchain();
 	/// <summary>
 	/// レンダーターゲットビュー初期化
 	/// </summary>
-	void InityalizeRenderTargetView();
+	void InitializeRenderTargetView();
 	/// <summary>
 	/// 深度バッファの初期化
 	/// </summary>
-	void InityalizeDepthBuffer();
+	void InitializeDepthBuffer();
 	/// <summary>
 	/// フェンスの初期化
 	/// </summary>
-	void InityalizeFence();
+	void InitializeFence();
+	/// <summary>
+	/// FPS固定初期化
+	/// </summary>
+	void InitializeFixFPS();
+	/// <summary>
+	/// FPS固定更新
+	/// </summary>
+	void UpdateFixFPS();
+
+
 	//デバイス取得
 	ID3D12Device* GetDevice()const { return device.Get(); }
 	//コマンドリスト
-	ID3D12GraphicsCommandList*GetCommandList()const { return commandList.Get(); }
+	ID3D12GraphicsCommandList* GetCommandList()const { return commandList.Get(); }
 private:
 	//DirectX12デバイス
 	Microsoft::WRL::ComPtr<ID3D12Device>device;
@@ -74,6 +85,8 @@ private:
 	//フェンス
 	Microsoft::WRL::ComPtr<ID3D12Fence> fence;
 	UINT64 fenceVal = 0;
+	//記録時間(FPS固定用)
+	std::chrono::steady_clock::time_point reference_;
 private:
 	//WindowsAPI
 	WinApp* winApp = nullptr;
