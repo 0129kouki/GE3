@@ -4,6 +4,10 @@
 #include<wrl.h>
 #include<vector>
 #include"WinApp.h"
+
+#pragma comment(lib,"d3d12.lib")
+#pragma comment(lib,"dxgi.lib")
+
 //DirectX基盤
 class DirectXCommon
 {
@@ -12,7 +16,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Inityalize(WinApp*winApp);
+	void Inityalize(WinApp* winApp);
 	/// <summary>
 	/// 描画前処理
 	/// </summary>
@@ -33,18 +37,22 @@ public:
 	/// スワップチェーン初期化
 	/// </summary>
 	void InityalizeSwapchain();
-/// <summary>
-/// レンダーターゲットビュー初期化
-/// </summary>
+	/// <summary>
+	/// レンダーターゲットビュー初期化
+	/// </summary>
 	void InityalizeRenderTargetView();
-/// <summary>
-/// 深度バッファの初期化
-/// </summary>
+	/// <summary>
+	/// 深度バッファの初期化
+	/// </summary>
 	void InityalizeDepthBuffer();
-/// <summary>
-/// フェンスの初期化
-/// </summary>
+	/// <summary>
+	/// フェンスの初期化
+	/// </summary>
 	void InityalizeFence();
+	//デバイス取得
+	ID3D12Device* GetDevice()const { return device.Get(); }
+	//コマンドリスト
+	ID3D12GraphicsCommandList*GetCommandList()const { return commandList.Get(); }
 private:
 	//DirectX12デバイス
 	Microsoft::WRL::ComPtr<ID3D12Device>device;

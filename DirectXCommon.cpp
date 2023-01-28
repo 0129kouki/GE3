@@ -1,7 +1,5 @@
 #include "DirectXCommon.h"
 #include<cassert>
-#pragma comment(lib,"d3d12.lid")
-#pragma comment(lib,"dxgi.lib")
 
 using namespace Microsoft::WRL;
 
@@ -12,7 +10,7 @@ void DirectXCommon::Inityalize(WinApp* winApp)
 	//メンバ変数に記録
 	this->winApp = winApp;
 	// DirectX初期化処理　ここから
-	HRESULT result;
+	//HRESULT result;
 	// DirectX初期化処理　ここまで
 
 }
@@ -237,7 +235,7 @@ void DirectXCommon::InityalizeSwapchain()
 }
 void DirectXCommon::InityalizeRenderTargetView()
 {
-	HRESULT result;
+	//HRESULT result;
 	// デスクリプタヒープの設定
 	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc{};
 	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV; // レンダーターゲットビュー
