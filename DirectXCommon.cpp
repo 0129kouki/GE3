@@ -4,7 +4,7 @@
 
 using namespace Microsoft::WRL;
 
-void DirectXCommon::Inityalize(WinApp* winApp)
+void DirectXCommon::Initialize(WinApp* winApp)
 {
 	//NULLŒŸo
 	assert(winApp);
@@ -12,6 +12,12 @@ void DirectXCommon::Inityalize(WinApp* winApp)
 	this->winApp = winApp;
 	//FPSŒÅ’è
 	InitializeFixFPS();
+	InitializeDevice();
+	InitializeCommand();
+	InitializeSwapchain();
+	InitializeRenderTargetView();
+	InitializeDepthBuffer();
+	InitializeFence();
 	// DirectX‰Šú‰»ˆ—@‚±‚±‚©‚ç
 	//HRESULT result;
 	// DirectX‰Šú‰»ˆ—@‚±‚±‚Ü‚Å

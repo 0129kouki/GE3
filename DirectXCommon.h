@@ -17,7 +17,7 @@ public:
 	/// <summary>
 	/// ‰Šú‰»
 	/// </summary>
-	void Inityalize(WinApp* winApp);
+	void Initialize(WinApp* winApp);
 	/// <summary>
 	/// •`‰æ‘Oˆ—
 	/// </summary>

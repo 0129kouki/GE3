@@ -1,12 +1,25 @@
 #include "WinApp.h"
 #pragma comment(lib,"winmm.lib")
 #include<Windows.h>
+LRESULT WinApp::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+{
+	//メッセージで分岐
+	switch (msg)
+	{
+		//ウィンドウが破棄された
+	case WM_DESTROY:
+		//OSに対して、アプリの終了を伝える
+		PostQuitMessage(0);
+		return 0;
+	}
+	//標準の処理を行う
+	return DefWindowProc(hwnd, msg, wparam, lparam);
+}
 void WinApp::Initialize()
 {
-
 	// ウィンドウサイズ
-	//const int window_width = 1280;  // 横幅
-	//const int window_height = 720;  // 縦幅
+	const int window_width = 1280;  // 横幅
+	const int window_height = 720;  // 縦幅
 	// ウィンドウクラスの設定
 	//WNDCLASSEX w{};
 	w.cbSize = sizeof(WNDCLASSEX);
@@ -21,7 +34,7 @@ void WinApp::Initialize()
 	// 自動でサイズを補正する
 	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
 	// ウィンドウオブジェクトの生成
-	/*HWND*/ hwnd = CreateWindow(w.lpszClassName, // クラス名
+	hwnd = CreateWindow(w.lpszClassName, // クラス名
 		L"DirectXGame",         // タイトルバーの文字
 		WS_OVERLAPPEDWINDOW,        // 標準的なウィンドウスタイル
 		CW_USEDEFAULT,              // 表示X座標（OSに任せる）
@@ -39,15 +52,6 @@ void WinApp::Initialize()
 	//システムタイマーの分解能を上げる
 	timeBeginPeriod(1);
 }
-void WinApp::Update()
-{
-
-}
-void WinApp::Finalize()
-{
-	//ウィンドウクラスを登録解除
-	UnregisterClass(w.lpszClassName, w.hInstance);
-}
 bool WinApp::ProcessMessage()
 {
 	MSG msg{};
@@ -62,17 +66,8 @@ bool WinApp::ProcessMessage()
 	}
 	return false;
 }
-LRESULT WinApp::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+void WinApp::Finalize()
 {
-	//メッセージで分岐
-	switch (msg)
-	{
-		//ウィンドウが破棄された
-	case WM_DESTROY:
-		//OSに対して、アプリの終了を伝える
-		PostQuitMessage(0);
-		return 0;
-	}
-	//標準の処理を行う
-	return DefWindowProc(hwnd, msg, wparam, lparam);
+	//ウィンドウクラスを登録解除
+	UnregisterClass(w.lpszClassName, w.hInstance);
 }
